@@ -260,3 +260,23 @@
     overflow: hidden;
   }
 }
+
+@media print {
+  aside,
+  body > #root header {
+    display: none !important;
+  }
+
+  body,
+  #root,
+  .reports-page {
+    background: #fff !important;
+    color: #111 !important;
+  }
+
+  .reports-page .bg-den-card {
+    background: #fff !important;
+    border-color: #d4d4d8 !important;
+    color: #111 !important;
+  }
+}
