@@ -1,260 +1,222 @@
-TheFitnessDen --- Gym Management System
+# TheFitnessDen
 
-Train. Track. Transform.
+**Train. Track. Transform.**
 
-TheFitnessDen is a modern full-stack gym management system designed to
-help gym staff manage members, memberships, payments, attendance,
-trainers, workout plans, progress, expenses, reports, notifications,
-reminders, and gym settings from one dashboard.
+TheFitnessDen is a full-stack gym management system that gives gym staff a single dashboard for members, memberships, payments, attendance, trainers, workout plans, progress tracking, expenses, reports, notifications, and gym settings.
 
-Features
+![Status](https://img.shields.io/badge/status-production--ready-brightgreen)
+![License](https://img.shields.io/badge/license-proprietary-lightgrey)
 
-🔐 Authentication with Supabase
+---
 
-📊 Dashboard with gym statistics and analytics
+## Table of Contents
 
-👥 Member management
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [Supabase Setup](#supabase-setup)
+- [Deployment](#deployment)
+- [Security](#security)
+- [Development Commands](#development-commands)
+- [Status](#status)
+- [License](#license)
 
-💳 Membership plans and member memberships
+---
 
-💰 Payment management
+## Features
 
-🏃 Attendance tracking
+| Category | Capabilities |
+|---|---|
+| 🔐 Authentication | Secure login via Supabase Auth |
+| 📊 Dashboard | Real-time gym statistics and analytics |
+| 👥 Members | Full member management |
+| 💳 Memberships | Plans, subscriptions, and renewals |
+| 💰 Payments | Payment tracking and history |
+| 🏃 Attendance | Check-in/check-out tracking |
+| 🧑‍🏫 Trainers | Trainer profiles and member assignment |
+| 🏋️ Workout Plans | Custom plans and exercise libraries |
+| 📈 Progress | Measurements and progress photos |
+| 🧾 Expenses | Expense logging with receipt uploads |
+| 📊 Reports | Analytics and exportable reports |
+| 🔔 Notifications | In-app notifications and reminders |
+| ⚙️ Settings | Branding, currency, timezone, appearance |
+| 📱 Responsive | Optimized for desktop and mobile |
+| 🔒 RLS | Row Level Security on all tables |
 
-🧑‍🏫 Trainer management and member-trainer assignment
+---
 
-🏋️ Workout plan management
+## Tech Stack
 
-📈 Member progress and measurement tracking
+**Frontend**
+- React + TypeScript
+- Vite
+- Tailwind CSS
+- React Router
+- Lucide React (icons)
+- Recharts (charts)
 
-📸 Progress photo management
+**Backend / Database**
+- Supabase (Auth, Database, Storage)
+- PostgreSQL
+- Row Level Security (RLS)
 
-🧾 Expense management and receipt uploads
+**Deployment**
+- Vercel
 
-📊 Reports and analytics
+---
 
-🔔 Notifications and reminders
+## Project Structure
 
-⚙️ Gym configuration and settings
-
-🖼️ Gym logo/branding management
-
-🌙 Dark/light appearance settings
-
-📱 Responsive interface for desktop and mobile
-
-🔒 Supabase Row Level Security (RLS)
-
-☁️ Supabase Storage for uploaded assets
-
-Technology Stack
-
-Frontend
-
-React
-
-TypeScript
-
-Vite
-
-Tailwind CSS
-
-React Router
-
-Lucide React
-
-Recharts
-
-Backend / Database
-
-Supabase
-
-PostgreSQL
-
-Supabase Authentication
-
-Supabase Storage
-
-Row Level Security (RLS)
-
-Deployment
-
-Vercel
-
-Project Structure
-
+```text
 thefitnessden/
 ├── src/
-│   ├── components/
-│   ├── context/
-│   ├── pages/
-│   ├── services/
-│   ├── lib/
+│   ├── components/     # Reusable UI components
+│   ├── context/         # React context providers
+│   ├── pages/            # Route-level views
+│   ├── services/       # API and data-access layer
+│   ├── lib/                # Utilities and Supabase client
 │   └── ...
 ├── supabase/
-│   └── migrations/
+│   └── migrations/     # Database schema migrations
 ├── public/
-├── .env.local
+├── .env.local             # Local environment variables (not committed)
 ├── package.json
 ├── vite.config.*
 └── README.md
+```
 
-Getting Started
+---
 
-1. Clone the repository
+## Getting Started
 
+### Prerequisites
+
+- Node.js 18+
+- npm
+- A Supabase project
+
+### 1. Clone the repository
+
+```bash
 git clone <YOUR_GITHUB_REPOSITORY_URL>
 cd thefitnessden
+```
 
-2. Install dependencies
+### 2. Install dependencies
 
+```bash
 npm install
+```
 
-3. Configure environment variables
+### 3. Configure environment variables
 
-Create a .env.local file in the project root:
+Create a `.env.local` file in the project root:
 
+```env
 VITE_SUPABASE_URL=your_supabase_project_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-Do not commit .env.local or any Supabase service-role/secret key.
+> ⚠️ Never commit `.env.local` or any Supabase service-role/secret key.
 
-4. Run the development server
+### 4. Apply database migrations
 
+Apply the migrations in `supabase/migrations/` to your Supabase project (via the Supabase CLI or SQL editor) before running the app.
+
+### 5. Run the development server
+
+```bash
 npm run dev
+```
 
-The application will be available at the local Vite development URL
-shown in the terminal.
+The app will be available at the local Vite URL printed in the terminal.
 
-5. Build for production
+### 6. Build for production
 
+```bash
 npm run build
+```
 
-Supabase Setup
+---
 
-The application uses Supabase for authentication, PostgreSQL data, Row
-Level Security, and file storage.
+## Environment Variables
 
-Main database areas include:
+| Variable | Required | Description |
+|---|---|---|
+| `VITE_SUPABASE_URL` | ✅ | Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | ✅ | Supabase public/anon key |
 
-Members
+Never expose the Supabase **service-role** key in frontend code or Vite environment variables — it belongs only in server-side/admin contexts.
 
-Membership plans
+---
 
-Memberships
+## Supabase Setup
 
-Payments
+The application relies on Supabase for authentication, PostgreSQL data storage, Row Level Security, and file storage.
 
-Attendance
+**Database areas:**
+Members · Membership plans · Memberships · Payments · Attendance · Trainers · Workout plans · Exercises · Progress records · Progress photos · Expenses · Notifications · Reminders · Gym settings · Notification preferences
 
-Trainers
+**Storage buckets:**
 
-Workout plans
+| Bucket | Purpose |
+|---|---|
+| `gym-assets` | Logos and branding assets |
+| `trainer-photos` | Trainer profile photos |
+| `progress-photos` | Member progress photos |
+| `expense-receipts` | Uploaded expense receipts |
 
-Exercises
+---
 
-Progress records
+## Deployment
 
-Progress photos
+Deploy to Vercel in a few steps:
 
-Expenses
+1. Push the latest code to GitHub.
+2. Import the repository into Vercel.
+3. Select the **Vite** project preset.
+4. Add the required environment variables.
+5. Deploy.
+6. Verify authentication and Supabase functionality on the deployed URL.
 
-Notifications
+**Vercel build settings:**
 
-Reminders
+| Setting | Value |
+|---|---|
+| Framework Preset | Vite |
+| Build Command | `npm run build` |
+| Output Directory | `dist` |
 
-Gym settings
+---
 
-Notification preferences
+## Security
 
-Storage buckets include:
+- Keep Row Level Security (RLS) enabled on all application tables.
+- Review database policies regularly.
+- Keep private storage buckets private; use signed URLs for private files.
+- Never commit `.env.local`.
+- Never expose the Supabase service-role/secret key in frontend code.
 
-gym-assets
+---
 
-trainer-photos
+## Development Commands
 
-progress-photos
+```bash
+npm install     # Install dependencies
+npm run dev     # Start local dev server
+npm run build   # Build for production
+```
 
-expense-receipts
+---
 
-Apply the project's Supabase migrations to a new Supabase project before
-using the application.
+## Status
 
-Environment Variables
+✅ Core features implemented and functionally tested — ready for production deployment.
 
-Required frontend variables:
+---
 
-Variable                   Description
+## License
 
-VITE_SUPABASE_URL        Supabase project URL
-VITE_SUPABASE_ANON_KEY   Supabase public/anon key
-
-Never expose the Supabase service-role key in frontend code or Vite
-environment variables.
-
-Production Deployment
-
-The project can be deployed using Vercel.
-
-Push the latest code to GitHub.
-
-Import the repository into Vercel.
-
-Select the Vite project configuration.
-
-Add the required environment variables.
-
-Deploy the application.
-
-Test authentication and Supabase functionality on the deployed URL.
-
-Typical Vite settings:
-
-Framework Preset: Vite
-Build Command: npm run build
-Output Directory: dist
-
-Security
-
-The project uses Supabase Row Level Security (RLS) for database
-protection.
-
-Before production deployment:
-
-Keep RLS enabled on application tables.
-
-Review database policies.
-
-Keep private storage buckets private where appropriate.
-
-Use signed URLs for private files.
-
-Never commit .env.local.
-
-Never expose a Supabase service-role/secret key in the frontend.
-
-Branding
-
-Product: TheFitnessDen
-
-Tagline: Train. Track. Transform.
-
-The application is designed with a premium dark gym-management aesthetic
-and supports configurable gym branding, logo, currency, timezone,
-appearance, and notification preferences.
-
-Development Commands
-
-npm install
-npm run dev
-npm run build
-
-Status
-
-TheFitnessDen has completed its core feature implementation and
-functional testing and is prepared for production deployment.
-
-License
-
-This project is intended for the TheFitnessDen gym management
-application.
+This project is intended for the TheFitnessDen gym management application. All rights reserved.
