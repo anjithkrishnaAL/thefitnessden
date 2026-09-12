@@ -173,6 +173,7 @@ export interface Member {
   updated_at: string;
   current_membership?: MembershipSummary | null;
   trainer?: Pick<Trainer, 'id' | 'trainer_id' | 'full_name' | 'specialization' | 'profile_photo_url'> | null;
+  current_workout_plan?: { id: string; plan_id: string; name: string; goal: string | null; difficulty: string | null; duration_weeks: number | null; start_date: string | null; end_date: string | null; status: string } | null;
 }
 
 export interface CreateMemberInput {
@@ -202,6 +203,7 @@ export interface MemberFilters {
   gender: MemberGender | '';
   fitness_goal: FitnessGoal | '';
   trainer_id: string;
+  workout_plan_id?: string;
 }
 
 export interface MemberStats {
@@ -436,3 +438,11 @@ export interface AttendanceFilters {
 export interface CheckInInput { member_id: string; notes?: string; }
 export interface CheckOutInput { id: string; }
 export interface AttendanceCalendarData { date: string; count: number; }
+
+// ─── Workout Plans Module ────────────────────────────────────────────────────
+export type WorkoutPlanStatus = 'active' | 'inactive' | 'draft';
+export interface WorkoutPlan { id: string; plan_id: string; name: string; description: string | null; goal: string | null; difficulty: string | null; duration_weeks: number | null; status: WorkoutPlanStatus; created_by: string | null; created_at: string; updated_at: string; day_count?: number; assigned_count?: number; }
+export interface WorkoutDay { id: string; workout_plan_id: string; day_number: number; day_name: string | null; focus: string | null; exercises?: WorkoutDayExercise[]; }
+export interface Exercise { id: string; name: string; category: string | null; muscle_group: string | null; equipment: string | null; description: string | null; }
+export interface WorkoutDayExercise { id: string; workout_day_id: string; exercise_id: string; sets: number | null; reps: string | null; duration_minutes: number | null; rest_seconds: number | null; weight: string | null; notes: string | null; order_index: number; exercise?: Exercise; }
+export interface WorkoutPlanFilters { search: string; status: WorkoutPlanStatus | ''; goal: string; difficulty: string; }

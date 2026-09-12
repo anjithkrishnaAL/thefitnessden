@@ -102,7 +102,7 @@ export function MemberTable({ members, loading, onView, onEdit, onDelete }: Memb
       <table className="w-full min-w-[720px] text-sm">
         <thead>
           <tr className="border-b border-den-border">
-            {['Member', 'Member ID', 'Contact', 'Membership', 'Trainer', 'Status', 'Joined', ''].map(h => (
+            {['Member', 'Member ID', 'Contact', 'Membership', 'Trainer', 'Workout Plan', 'Status', 'Joined', ''].map(h => (
               <th
                 key={h}
                 className={`text-left text-xs text-den-muted font-medium py-3 ${h === '' ? 'w-10 pr-4' : 'px-3'} ${h === 'Member' ? 'pl-4' : ''}`}
@@ -150,6 +150,7 @@ export function MemberTable({ members, loading, onView, onEdit, onDelete }: Memb
                 </td>
 
                 <td className="py-3 px-3"><span className="text-xs text-den-muted">{m.trainer?.full_name ?? '—'}</span></td>
+                <td className="py-3 px-3"><span className="text-xs text-den-muted">{m.current_workout_plan ? <>{m.current_workout_plan.name}<span className="block font-mono text-2xs">{m.current_workout_plan.plan_id}</span></> : 'Unassigned'}</span></td>
 
                 {/* Status */}
                 <td className="py-3 px-3">

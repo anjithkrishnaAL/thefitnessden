@@ -7,6 +7,7 @@
 
 import { supabase } from '../lib/supabase';
 import { getActiveMembership } from './membershipService';
+import { getMemberWorkoutPlan } from './workoutService';
 import type {
   Member,
   CreateMemberInput,
@@ -75,6 +76,8 @@ export async function getMembers(
     if (filters.fitness_goal) query = query.eq('fitness_goal', filters.fitness_goal);
     if (filters.trainer_id === '__unassigned__') query = query.is('trainer_id', null);
     else if (filters.trainer_id) query = query.eq('trainer_id', filters.trainer_id);
+    if (filters.workout_plan_id === '__unassigned__') { const { data: assigned } = await supabase.from('workout_plan_members').select('member_id').eq('status', 'active'); if (assigned?.length) query = query.not('id', 'in', `(${assigned.map(row => row.member_id).join(',')})`); }
+    else if (filters.workout_plan_id) { const { data: assigned } = await supabase.from('workout_plan_members').select('member_id').eq('workout_plan_id', filters.workout_plan_id).eq('status', 'active'); query = query.in('id', (assigned ?? []).map(row => row.member_id)); }
 
     // Server-side pagination
     const from = (page - 1) * pageSize;
@@ -97,7 +100,7 @@ export async function getMembers(
       try { return { ...member, current_membership: await getActiveMembership(member.id) }; }
       catch (membershipError) { console.error('[memberService.getMembers] membership lookup:', membershipError); return member; }
     }));
-    const hydrated = hydratedMemberships.map(member => ({ ...member, trainer: member.trainer_id ? trainers.get(member.trainer_id) ?? null : null }));
+    const hydrated = await Promise.all(hydratedMemberships.map(async member => ({ ...member, trainer: member.trainer_id ? trainers.get(member.trainer_id) ?? null : null, current_workout_plan: await getMemberWorkoutPlan(member.id).catch(() => null) })));
 
     return {
       data: hydrated,
@@ -127,6 +130,8 @@ export async function exportMembers(filters: MemberFilters): Promise<Member[]> {
     if (filters.fitness_goal) query = query.eq('fitness_goal', filters.fitness_goal);
     if (filters.trainer_id === '__unassigned__') query = query.is('trainer_id', null);
     else if (filters.trainer_id) query = query.eq('trainer_id', filters.trainer_id);
+    if (filters.workout_plan_id === '__unassigned__') { const { data: assigned } = await supabase.from('workout_plan_members').select('member_id').eq('status', 'active'); if (assigned?.length) query = query.not('id', 'in', `(${assigned.map(row => row.member_id).join(',')})`); }
+    else if (filters.workout_plan_id) { const { data: assigned } = await supabase.from('workout_plan_members').select('member_id').eq('workout_plan_id', filters.workout_plan_id).eq('status', 'active'); query = query.in('id', (assigned ?? []).map(row => row.member_id)); }
 
     const { data, error } = await query.order('created_at', { ascending: false });
     if (error) {
