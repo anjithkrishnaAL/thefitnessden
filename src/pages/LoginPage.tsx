@@ -5,6 +5,7 @@ import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { cn } from '../lib/cn';
 import { useAuth } from '../hooks/useAuth';
+import { useGymSettings } from '../context/GymSettingsContext';
 
 const FEATURES = [
   { icon: <Dumbbell size={16} />, label: 'Member management at your fingertips' },
@@ -14,8 +15,10 @@ const FEATURES = [
 
 export function LoginPage() {
   const { signIn } = useAuth();
+  const { settings } = useGymSettings();
   const navigate = useNavigate();
   const location = useLocation();
+  const brandingLogo = settings?.logo_display_url || settings?.logo_url || null;
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -81,7 +84,7 @@ export function LoginPage() {
           {/* Brand */}
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-den-accent/10 border border-den-accent/25">
-              <Zap size={20} className="text-den-accent" />
+              {brandingLogo ? <img src={brandingLogo} alt="Gym logo" className="w-full h-full object-contain" /> : <Zap size={20} className="text-den-accent" />}
             </div>
             <div className="leading-none select-none">
               <div className="text-[10px] font-bold tracking-[0.25em] text-den-muted uppercase">The</div>
@@ -130,7 +133,7 @@ export function LoginPage() {
         {/* Mobile brand */}
         <div className="flex lg:hidden items-center gap-3 mb-10">
           <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-den-accent/10 border border-den-accent/25">
-            <Zap size={18} className="text-den-accent" />
+            {brandingLogo ? <img src={brandingLogo} alt="Gym logo" className="w-full h-full object-contain" /> : <Zap size={18} className="text-den-accent" />}
           </div>
           <div className="leading-none select-none">
             <div className="text-[9px] font-bold tracking-[0.25em] text-den-muted uppercase">The</div>

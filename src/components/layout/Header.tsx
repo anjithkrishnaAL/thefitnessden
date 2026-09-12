@@ -8,6 +8,7 @@ import { Skeleton } from '../ui/Skeleton';
 import { cn } from '../../lib/cn';
 import { useAuth } from '../../hooks/useAuth';
 import { getNotifications, getUnreadNotificationCount, type NotificationRow } from '../../services/notificationService';
+import { useGymSettings } from '../../context/GymSettingsContext';
 
 // Map routes to page titles
 const PAGE_TITLES: Record<string, string> = {
@@ -34,6 +35,7 @@ export function Header({ onMenuClick }: HeaderProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { profile, signOut } = useAuth();
+  const { settings } = useGymSettings();
   const [searchValue, setSearchValue] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);
   const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
@@ -44,6 +46,7 @@ export function Header({ onMenuClick }: HeaderProps) {
   }, [location.pathname]);
 
   const pageTitle = PAGE_TITLES[location.pathname] ?? 'TheFitnessDen';
+  const brandingLogo = settings?.logo_display_url || settings?.logo_url || null;
 
   // Derive display values from real profile
   const displayName = profile?.full_name || 'User';
@@ -98,9 +101,10 @@ export function Header({ onMenuClick }: HeaderProps) {
       </button>
 
       {/* Page title */}
-      <h1 className="text-base font-semibold text-den-text hidden sm:block truncate shrink-0">
-        {pageTitle}
-      </h1>
+      <div className="flex items-center gap-2 min-w-0">
+        {brandingLogo && <img src={brandingLogo} alt="Gym logo" className="w-7 h-7 rounded-md object-contain" />}
+        <h1 className="text-base font-semibold text-den-text hidden sm:block truncate shrink-0">{pageTitle}</h1>
+      </div>
 
       {/* Spacer */}
       <div className="flex-1" />

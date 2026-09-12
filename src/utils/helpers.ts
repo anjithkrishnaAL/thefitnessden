@@ -1,10 +1,11 @@
 // Utility helpers will be added here
 // e.g. formatDate, formatCurrency, etc.
 
-export function formatCurrency(amount: number, currency = 'USD'): string {
+export function formatCurrency(amount: number, currency?: string): string {
+  const configuredCurrency = currency ?? (typeof window !== 'undefined' ? localStorage.getItem('tfd-currency') : null) ?? 'INR';
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency,
+    currency: configuredCurrency,
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   }).format(amount);

@@ -96,6 +96,33 @@
   }
 }
 
+/* Runtime settings overrides. Tailwind utilities resolve these theme tokens, so
+   changing them updates the existing design without introducing a second theme. */
+:root,
+[data-theme='dark'] {
+  --color-den-bg: #0a0a0b;
+  --color-den-surface: #111115;
+  --color-den-card: #16161c;
+  --color-den-border: #1e1e28;
+  --color-den-accent: #a3e635;
+  --color-den-accent-dim: #84cc16;
+  --color-den-text: #f4f4f5;
+  --color-den-muted: #71717a;
+}
+[data-theme='light'] {
+  --color-den-bg: #f4f6f8;
+  --color-den-surface: #ffffff;
+  --color-den-card: #ffffff;
+  --color-den-border: #d9dee7;
+  --color-den-accent: #65a30d;
+  --color-den-accent-dim: #4d7c0f;
+  --color-den-text: #17202a;
+  --color-den-muted: #5f6b78;
+}
+[data-accent='blue'] { --color-den-accent: #38bdf8; --color-den-accent-dim: #0284c7; }
+[data-accent='purple'] { --color-den-accent: #c084fc; --color-den-accent-dim: #9333ea; }
+[data-accent='orange'] { --color-den-accent: #fb923c; --color-den-accent-dim: #ea580c; }
+
 /* ─── Base Styles ──────────────────────────────────────────────────────────── */
 @layer base {
   *,
@@ -113,8 +140,8 @@
   }
 
   body {
-    background-color: #0a0a0b;
-    color: #f4f4f5;
+    background-color: var(--color-den-bg);
+    color: var(--color-den-text);
     min-height: 100vh;
     overflow-x: hidden;
   }
@@ -143,7 +170,7 @@
 
   /* Focus visible */
   :focus-visible {
-    outline: 2px solid #a3e635;
+    outline: 2px solid var(--color-den-accent);
     outline-offset: 2px;
     border-radius: 4px;
   }

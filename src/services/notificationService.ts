@@ -4,7 +4,21 @@ export interface NotificationRow { id: string; notification_id: string; title: s
 export interface ReminderRow { id: string; reminder_id: string; title: string; description: string | null; reminder_type: string; member_id: string | null; due_date: string; due_time: string | null; status: 'pending'|'completed'|'cancelled'; priority: 'low'|'normal'|'high'|'urgent'; created_at: string; updated_at: string; member?: { full_name?: string; member_id?: string } | null; }
 export type ReminderInput = Pick<ReminderRow, 'title'|'description'|'reminder_type'|'member_id'|'due_date'|'due_time'|'priority'>;
 
+const notificationPreferenceKey: Record<string, 'membership_expiry' | 'payment_notifications' | 'new_member_notifications' | 'workout_plan_notifications' | 'progress_notifications' | 'reminder_notifications'> = { 'membership expiry': 'membership_expiry', 'payment': 'payment_notifications', 'new member': 'new_member_notifications', 'workout plan': 'workout_plan_notifications', 'progress': 'progress_notifications', 'reminder': 'reminder_notifications' };
+
+async function notificationEnabled(type: string) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+  const key = notificationPreferenceKey[type.toLowerCase()];
+  if (!key) return true;
+  const { data, error } = await supabase.from('notification_preferences').select('*').eq('user_id', user.id).maybeSingle();
+  if (error) { console.error('[notificationService.preferences]', error); return true; }
+  if (!data) { const { error: createError } = await supabase.from('notification_preferences').upsert({ user_id: user.id }, { onConflict: 'user_id', ignoreDuplicates: true }); if (createError) console.error('[notificationService.preferences.create]', createError); return true; }
+  return Boolean(data[key]);
+}
+
 export async function createNotification(input: { title: string; message: string; type: string; priority?: NotificationRow['priority']; member_id?: string | null; related_membership_id?: string | null; related_payment_id?: string | null; dedupe_key?: string }) {
+  if (!(await notificationEnabled(input.type))) return;
   const { error } = await supabase.from('notifications').insert({ ...input, priority: input.priority ?? 'normal' });
   if (error) throw new Error(error.message);
 }

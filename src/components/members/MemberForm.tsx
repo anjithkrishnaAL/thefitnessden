@@ -266,6 +266,7 @@ export function MemberForm({ open, onClose, onSuccess, member }: MemberFormProps
               src={photoPreview}
               alt="Preview"
               className="w-16 h-16 rounded-full object-cover border-2 border-den-border"
+              onError={() => setPhotoPreview(null)}
             />
           ) : (
             <Avatar name={form.full_name || 'Member'} size="xl" />

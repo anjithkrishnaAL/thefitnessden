@@ -20,6 +20,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { cn } from '../../lib/cn';
+import { useGymSettings } from '../../context/GymSettingsContext';
 
 interface NavItem {
   id: string;
@@ -96,6 +97,8 @@ function NavItemLink({
 }
 
 export function Sidebar({ collapsed, mobileOpen, onToggleCollapsed, onCloseMobile }: SidebarProps) {
+  const { settings } = useGymSettings();
+  const logo = settings?.logo_display_url || (settings?.logo_url?.startsWith('http') ? settings.logo_url : null);
   return (
     <>
       {/* Mobile backdrop */}
@@ -130,8 +133,8 @@ export function Sidebar({ collapsed, mobileOpen, onToggleCollapsed, onCloseMobil
           {!collapsed ? (
             <>
               {/* Logo mark */}
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-den-accent/10 border border-den-accent/25 shrink-0">
-                <Zap size={16} className="text-den-accent" />
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-den-accent/10 border border-den-accent/25 shrink-0 overflow-hidden">
+                {logo ? <img src={logo} alt="Gym logo" className="w-full h-full object-contain" onError={e => { e.currentTarget.style.display = 'none'; }} /> : <Zap size={16} className="text-den-accent" />}
               </div>
               {/* Text logo */}
               <div className="leading-none select-none">
@@ -141,8 +144,8 @@ export function Sidebar({ collapsed, mobileOpen, onToggleCollapsed, onCloseMobil
               </div>
             </>
           ) : (
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-den-accent/10 border border-den-accent/25">
-              <Zap size={16} className="text-den-accent" />
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-den-accent/10 border border-den-accent/25 overflow-hidden">
+              {logo ? <img src={logo} alt="Gym logo" className="w-full h-full object-contain" onError={e => { e.currentTarget.style.display = 'none'; }} /> : <Zap size={16} className="text-den-accent" />}
             </div>
           )}
 
