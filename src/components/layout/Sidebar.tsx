@@ -12,6 +12,7 @@ import {
   Receipt,
   BarChart3,
   Bell,
+  CalendarClock,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -39,6 +40,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'expenses',      label: 'Expenses',         path: '/expenses',        icon: <Receipt size={18} /> },
   { id: 'reports',       label: 'Reports',          path: '/reports',         icon: <BarChart3 size={18} /> },
   { id: 'notifications', label: 'Notifications',    path: '/notifications',   icon: <Bell size={18} /> },
+  { id: 'reminders',     label: 'Reminders',         path: '/reminders',       icon: <CalendarClock size={18} /> },
   { id: 'settings',      label: 'Settings',         path: '/settings',        icon: <Settings size={18} /> },
 ];
 

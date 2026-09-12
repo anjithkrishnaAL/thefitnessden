@@ -1,8 +1,10 @@
 import { supabase } from '../lib/supabase';
 import type { CreatePaymentInput, Payment, PaymentFilters, PaymentStats, PaymentStatus, PaymentMethod, RevenueData, UpdatePaymentInput } from '../types';
+import { createNotification } from './notificationService';
 
 const today = () => new Date().toISOString().slice(0, 10);
 const monthStart = () => `${today().slice(0, 8)}01`;
+const moneyLabel = (value: number) => `₹${Number(value).toLocaleString('en-IN')}`;
 const normalize = (row: Record<string, unknown>): Payment => {
   const member = row.members as Payment['member'];
   const membershipRow = row.memberships as Record<string, unknown> | null;
@@ -32,7 +34,7 @@ export async function getPayments(filters: PaymentFilters, page: number, pageSiz
 }
 
 export async function getPayment(id: string): Promise<Payment | null> { const { data, error } = await supabase.from('payments').select('*, members(id, full_name, member_id, profile_photo_url), memberships(id, start_date, end_date, membership_plans(name))').eq('id', id).maybeSingle(); if (error) { console.error('[paymentService.getPayment]', error.message); throw new Error('Unable to load payment details.'); } return data ? normalize(data as Record<string, unknown>) : null; }
-export async function createPayment(input: CreatePaymentInput): Promise<Payment> { const { data, error } = await supabase.from('payments').insert(input).select('*, members(id, full_name, member_id, profile_photo_url), memberships(id, start_date, end_date, membership_plans(name))').single(); if (error) { console.error('[paymentService.createPayment]', error.message); throw new Error('Unable to record payment.'); } return normalize(data as Record<string, unknown>); }
+export async function createPayment(input: CreatePaymentInput): Promise<Payment> { const { data, error } = await supabase.from('payments').insert(input).select('*, members(id, full_name, member_id, profile_photo_url), memberships(id, start_date, end_date, membership_plans(name))').single(); if (error) { console.error('[paymentService.createPayment]', error.message); throw new Error('Unable to record payment.'); } const payment = normalize(data as Record<string, unknown>); void createNotification({ title: input.status === 'pending' ? 'Payment Pending' : input.status === 'failed' ? 'Payment Failed' : 'Payment Received', message: `${moneyLabel(payment.amount)} payment recorded for ${payment.member?.full_name ?? 'member'}.`, type: 'Payment', priority: input.status === 'failed' ? 'high' : 'normal', member_id: payment.member_id, related_payment_id: payment.id, dedupe_key: `payment:${payment.id}` }).catch(err => console.error('[paymentService.notification]', err)); return payment; }
 export async function updatePayment({ id, ...input }: UpdatePaymentInput): Promise<Payment> { const { data, error } = await supabase.from('payments').update(input).eq('id', id).select('*, members(id, full_name, member_id, profile_photo_url), memberships(id, start_date, end_date, membership_plans(name))').single(); if (error) { console.error('[paymentService.updatePayment]', error.message); throw new Error('Unable to update payment.'); } return normalize(data as Record<string, unknown>); }
 export async function deletePayment(id: string): Promise<void> { const { error } = await supabase.from('payments').delete().eq('id', id); if (error) { console.error('[paymentService.deletePayment]', error.message); throw new Error('Unable to delete payment.'); } }
 

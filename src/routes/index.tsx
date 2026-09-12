@@ -30,6 +30,7 @@ import { ProgressPage } from '../pages/ProgressPage';
 import { ExpensesPage } from '../pages/ExpensesPage';
 import { ReportsPage } from '../pages/ReportsPage';
 import { NotificationsPage } from '../pages/NotificationsPage';
+import { RemindersPage } from '../pages/RemindersPage';
 import { SettingsPage } from '../pages/SettingsPage';
 
 const router = createBrowserRouter([
@@ -69,6 +70,7 @@ const router = createBrowserRouter([
           { path: '/expenses',        element: <ExpensesPage /> },
           { path: '/reports',         element: <ReportsPage /> },
           { path: '/notifications',   element: <NotificationsPage /> },
+          { path: '/reminders',        element: <RemindersPage /> },
           { path: '/settings',        element: <SettingsPage /> },
         ],
       },

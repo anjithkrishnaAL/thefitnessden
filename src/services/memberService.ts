@@ -8,6 +8,7 @@
 import { supabase } from '../lib/supabase';
 import { getActiveMembership } from './membershipService';
 import { getMemberWorkoutPlan } from './workoutService';
+import { createNotification } from './notificationService';
 import type {
   Member,
   CreateMemberInput,
@@ -159,7 +160,9 @@ export async function getMember(id: string): Promise<Member | null> {
       console.error('[memberService.getMember]', error.message);
       return null;
     }
-    return data as Member;
+    const member = data as Member;
+    void createNotification({ title: 'New Member Added', message: `${member.full_name} (${member.member_id}) was added.`, type: 'New Member', member_id: member.id, dedupe_key: `new-member:${member.id}` }).catch(err => console.error('[memberService.notification]', err));
+    return member;
   } catch (err) {
     console.error('[memberService.getMember]', err);
     return null;

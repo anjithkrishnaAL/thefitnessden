@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { createNotification } from './notificationService';
 import type { ProgressPhoto, ProgressPhotoType, ProgressRecord } from '../types';
 
 function reportProgressError(context: string, error: { message: string; code?: string; details?: string; hint?: string }): never {
@@ -7,7 +8,7 @@ function reportProgressError(context: string, error: { message: string; code?: s
 }
 
 export async function getProgressRecords(memberId: string): Promise<ProgressRecord[]> { const { data, error } = await supabase.from('progress_records').select('*').eq('member_id', memberId).order('recorded_date', { ascending: true }).order('created_at', { ascending: true }); if (error) throw new Error(error.message); return (data ?? []) as ProgressRecord[]; }
-export async function createProgressRecord(input: Omit<ProgressRecord, 'id' | 'created_at' | 'updated_at'>): Promise<ProgressRecord> { const { data, error } = await supabase.from('progress_records').insert(input).select().single(); if (error) reportProgressError('progress_records.insert', error); return data as ProgressRecord; }
+export async function createProgressRecord(input: Omit<ProgressRecord, 'id' | 'created_at' | 'updated_at'>): Promise<ProgressRecord> { const { data, error } = await supabase.from('progress_records').insert(input).select().single(); if (error) reportProgressError('progress_records.insert', error); const record = data as ProgressRecord; void createNotification({ title: 'Progress Updated', message: `A new progress record${record.weight != null ? ` (${record.weight} kg)` : ''} was added.`, type: 'Progress', member_id: record.member_id, dedupe_key: `progress:${record.id}` }).catch(err => console.error('[progressService.notification]', err)); return record; }
 export async function updateProgressRecord(id: string, input: Partial<Omit<ProgressRecord, 'id' | 'member_id' | 'created_at' | 'updated_at'>>): Promise<ProgressRecord> { const { data, error } = await supabase.from('progress_records').update(input).eq('id', id).select().single(); if (error) throw new Error(error.message); return data as ProgressRecord; }
 export async function deleteProgressRecord(id: string) { const { error } = await supabase.from('progress_records').delete().eq('id', id); if (error) throw new Error(error.message); }
 export async function getProgressPhotos(memberId: string): Promise<ProgressPhoto[]> { const { data, error } = await supabase.from('progress_photos').select('*').eq('member_id', memberId).order('taken_date', { ascending: false }); if (error) throw new Error(error.message); return (data ?? []) as ProgressPhoto[]; }

@@ -1,21 +1,19 @@
-import React from 'react';
-import { Bell } from 'lucide-react';
-import { PlaceholderPage } from './PlaceholderPage';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Bell, Check, CheckCheck, Search, Trash2 } from 'lucide-react';
+import { Badge, Button, Card, EmptyState, Input, SkeletonCard, Tabs } from '../components/ui';
+import { useToast } from '../hooks/useToast';
+import { deleteNotification, deleteReadNotifications, ensureMembershipExpiryNotifications, getNotifications, markAllNotificationsRead, markNotificationRead, type NotificationRow } from '../services/notificationService';
+
+const filters = ['All', 'Unread', 'Memberships', 'Payments', 'Members', 'Workout Plans', 'Progress', 'System'];
+const typeFor = (filter: string) => filter === 'Memberships' ? 'Membership Expiry' : filter === 'Members' ? 'New Member' : filter === 'Workout Plans' ? 'Workout Plan' : filter;
+const timeAgo = (value: string) => { const minutes = Math.max(1, Math.floor((Date.now() - new Date(value).getTime()) / 60000)); if (minutes < 60) return `${minutes}m ago`; if (minutes < 1440) return `${Math.floor(minutes / 60)}h ago`; return `${Math.floor(minutes / 1440)}d ago`; };
 
 export function NotificationsPage() {
-  return (
-    <PlaceholderPage
-      title="Notifications"
-      description="Stay on top of what matters. Manage automated alerts for membership renewals, payment dues, birthday wishes, and system updates."
-      icon={<Bell size={32} />}
-      features={[
-        'Renewal reminders',
-        'Payment alerts',
-        'Birthday messages',
-        'System notifications',
-        'Email & SMS',
-        'Notification history',
-      ]}
-    />
-  );
+  const { success, error } = useToast(); const [rows, setRows] = useState<NotificationRow[]>([]); const [loading, setLoading] = useState(true); const [filter, setFilter] = useState('All'); const [search, setSearch] = useState('');
+  const load = useCallback(async () => { setLoading(true); try { await ensureMembershipExpiryNotifications(); setRows(await getNotifications()); } catch (e) { error('Could not load notifications', e instanceof Error ? e.message : ''); } finally { setLoading(false); } }, []);
+  useEffect(() => { void load(); }, [load]);
+  const visible = useMemo(() => rows.filter(row => (filter === 'Unread' ? !row.is_read : filter === 'All' ? true : row.type === typeFor(filter)) && (!search.trim() || `${row.title} ${row.message}`.toLowerCase().includes(search.toLowerCase()))), [rows, filter, search]);
+  const run = async (action: () => Promise<void>, message: string) => { try { await action(); await load(); success(message); } catch (e) { error('Action failed', e instanceof Error ? e.message : ''); } };
+  if (loading) return <div className="p-4 sm:p-6"><div className="grid grid-cols-2 lg:grid-cols-4 gap-4">{[1,2,3,4].map(i => <SkeletonCard key={i} />)}</div></div>;
+  return <div className="p-4 sm:p-6 space-y-6 max-w-[1200px] mx-auto"><div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4"><div><h1 className="text-2xl font-bold text-den-text">Notifications</h1><p className="text-sm text-den-muted mt-1">Stay updated with important gym activities.</p></div><div className="flex gap-2"><Button variant="outline" icon={<CheckCheck size={15} />} onClick={() => void run(markAllNotificationsRead, 'All notifications marked read')}>Mark All as Read</Button><Button variant="ghost" icon={<Trash2 size={15} />} onClick={() => void run(deleteReadNotifications, 'Read notifications deleted')}>Delete Read</Button></div></div><div className="grid grid-cols-2 lg:grid-cols-4 gap-4"><Card><p className="text-xs uppercase text-den-muted">Total</p><p className="text-2xl font-bold text-den-text mt-3">{rows.length}</p></Card><Card><p className="text-xs uppercase text-den-muted">Unread</p><p className="text-2xl font-bold text-den-accent mt-3">{rows.filter(r => !r.is_read).length}</p></Card><Card><p className="text-xs uppercase text-den-muted">High Priority</p><p className="text-2xl font-bold text-amber-400 mt-3">{rows.filter(r => r.priority === 'high' || r.priority === 'urgent').length}</p></Card><Card><p className="text-xs uppercase text-den-muted">Today</p><p className="text-2xl font-bold text-den-text mt-3">{rows.filter(r => r.created_at.slice(0,10) === new Date().toISOString().slice(0,10)).length}</p></Card></div><div className="flex flex-col gap-3"><Tabs tabs={filters.map(id => ({ id, label: id }))} active={filter} onChange={setFilter} variant="pill" /><div className="relative"><Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-den-muted" /><Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search title or message" className="pl-9" /></div></div>{visible.length ? <div className="space-y-2">{visible.map(row => <Card key={row.id} className={!row.is_read ? 'border-den-accent/30' : ''}><div className="flex items-start gap-3"><div className={`mt-1 w-2 h-2 rounded-full shrink-0 ${row.is_read ? 'bg-den-subtle' : 'bg-den-accent'}`} /><div className="flex-1 min-w-0"><div className="flex flex-wrap items-center gap-2"><h3 className="font-semibold text-den-text">{row.title}</h3><Badge variant={row.priority === 'urgent' ? 'danger' : row.priority === 'high' ? 'warning' : 'default'} size="sm">{row.priority}</Badge><span className="text-xs text-den-muted">{timeAgo(row.created_at)}</span></div><p className="text-sm text-den-muted mt-1">{row.message}</p><p className="text-2xs uppercase tracking-wider text-den-subtle mt-2">{row.type}</p></div><div className="flex gap-1">{!row.is_read && <button className="p-2 text-den-muted hover:text-den-accent" title="Mark as read" onClick={() => void run(() => markNotificationRead(row.id), 'Notification marked read')}><Check size={16} /></button>}<button className="p-2 text-den-muted hover:text-red-400" title="Delete" onClick={() => void run(() => deleteNotification(row.id), 'Notification deleted')}><Trash2 size={16} /></button></div></div></Card>)}</div> : <Card><EmptyState icon={<Bell size={22} />} title="No notifications" description="You are all caught up for this filter." /></Card>}</div>;
 }

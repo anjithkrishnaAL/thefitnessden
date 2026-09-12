@@ -7,6 +7,7 @@ import type { DropdownItem } from '../ui/Dropdown';
 import { Skeleton } from '../ui/Skeleton';
 import { cn } from '../../lib/cn';
 import { useAuth } from '../../hooks/useAuth';
+import { getNotifications, getUnreadNotificationCount, type NotificationRow } from '../../services/notificationService';
 
 // Map routes to page titles
 const PAGE_TITLES: Record<string, string> = {
@@ -21,6 +22,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/expenses': 'Expenses',
   '/reports': 'Reports',
   '/notifications': 'Notifications',
+  '/reminders': 'Reminders',
   '/settings': 'Settings',
 };
 
@@ -33,6 +35,13 @@ export function Header({ onMenuClick }: HeaderProps) {
   const navigate = useNavigate();
   const { profile, signOut } = useAuth();
   const [searchValue, setSearchValue] = useState('');
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
+  const [recentNotifications, setRecentNotifications] = useState<NotificationRow[]>([]);
+
+  React.useEffect(() => {
+    getUnreadNotificationCount().then(setUnreadCount).catch(() => setUnreadCount(0));
+  }, [location.pathname]);
 
   const pageTitle = PAGE_TITLES[location.pathname] ?? 'TheFitnessDen';
 
@@ -115,14 +124,13 @@ export function Header({ onMenuClick }: HeaderProps) {
       </div>
 
       {/* Notification bell */}
-      <button
-        onClick={() => navigate('/notifications')}
-        className="relative text-den-muted hover:text-den-text transition-colors p-2 rounded-xl hover:bg-white/5"
-        aria-label="Notifications"
-      >
-        <Bell size={19} />
-        <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-den-accent ring-2 ring-den-surface" />
-      </button>
+      <div className="relative">
+        <button onClick={() => { setNotificationPanelOpen(value => !value); void getNotifications().then(rows => setRecentNotifications(rows.slice(0, 5))).catch(() => setRecentNotifications([])); }} className="relative text-den-muted hover:text-den-text transition-colors p-2 rounded-xl hover:bg-white/5" aria-label="Notifications">
+          <Bell size={19} />
+          {unreadCount > 0 && <span className="absolute -top-0.5 -right-1 min-w-4 h-4 px-1 rounded-full bg-den-accent text-black text-[10px] font-bold flex items-center justify-center ring-2 ring-den-surface">{unreadCount > 99 ? '99+' : unreadCount}</span>}
+        </button>
+        {notificationPanelOpen && <div className="absolute right-0 top-11 z-50 w-80 rounded-xl border border-den-border bg-den-card shadow-den-xl p-3"><div className="flex items-center justify-between mb-2"><p className="text-sm font-semibold text-den-text">Notifications</p><button className="text-xs text-den-accent" onClick={() => { setNotificationPanelOpen(false); navigate('/notifications'); }}>View all</button></div>{recentNotifications.length ? <div className="space-y-1">{recentNotifications.map(item => <button key={item.id} onClick={() => { setNotificationPanelOpen(false); navigate('/notifications'); }} className="w-full text-left rounded-lg p-2.5 hover:bg-white/5"><p className="text-xs font-medium text-den-text truncate">{item.title}</p><p className="text-xs text-den-muted truncate mt-0.5">{item.message}</p></button>)}</div> : <p className="text-xs text-den-muted py-5 text-center">You are all caught up.</p>}</div>}
+      </div>
 
       {/* Profile dropdown */}
       {!profile ? (
