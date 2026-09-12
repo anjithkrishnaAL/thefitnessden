@@ -446,3 +446,8 @@ export interface WorkoutDay { id: string; workout_plan_id: string; day_number: n
 export interface Exercise { id: string; name: string; category: string | null; muscle_group: string | null; equipment: string | null; description: string | null; }
 export interface WorkoutDayExercise { id: string; workout_day_id: string; exercise_id: string; sets: number | null; reps: string | null; duration_minutes: number | null; rest_seconds: number | null; weight: string | null; notes: string | null; order_index: number; exercise?: Exercise; }
 export interface WorkoutPlanFilters { search: string; status: WorkoutPlanStatus | ''; goal: string; difficulty: string; }
+
+// ─── Progress Module ─────────────────────────────────────────────────────────
+export interface ProgressRecord { id: string; member_id: string; recorded_date: string; weight: number | null; height: number | null; body_fat_percentage: number | null; chest: number | null; waist: number | null; hips: number | null; arms: number | null; thighs: number | null; notes: string | null; created_at: string; updated_at: string; }
+export type ProgressPhotoType = 'Front' | 'Side' | 'Back' | 'Other';
+export interface ProgressPhoto { id: string; member_id: string; photo_url: string; photo_type: ProgressPhotoType | null; taken_date: string | null; notes: string | null; created_at: string; }

@@ -1,0 +1,25 @@
+-- TheFitnessDen — Progress tracking
+create table if not exists public.progress_records (id uuid primary key default gen_random_uuid(), member_id uuid not null references public.members(id) on delete cascade, recorded_date date not null, weight numeric check (weight >= 0), height numeric check (height >= 0), body_fat_percentage numeric check (body_fat_percentage >= 0 and body_fat_percentage <= 100), chest numeric check (chest >= 0), waist numeric check (waist >= 0), hips numeric check (hips >= 0), arms numeric check (arms >= 0), thighs numeric check (thighs >= 0), notes text, created_at timestamptz not null default now(), updated_at timestamptz not null default now());
+create table if not exists public.progress_photos (id uuid primary key default gen_random_uuid(), member_id uuid not null references public.members(id) on delete cascade, photo_url text not null, photo_type text check (photo_type in ('Front','Side','Back','Other')), taken_date date, notes text, created_at timestamptz not null default now());
+create index if not exists progress_records_member_idx on public.progress_records(member_id);
+create index if not exists progress_records_date_idx on public.progress_records(recorded_date desc);
+create index if not exists progress_photos_member_idx on public.progress_photos(member_id);
+drop trigger if exists progress_records_set_updated_at on public.progress_records;
+create trigger progress_records_set_updated_at before update on public.progress_records for each row execute function public.set_updated_at();
+alter table public.progress_records enable row level security;
+alter table public.progress_photos enable row level security;
+drop policy if exists "Authenticated progress records access" on public.progress_records;
+drop policy if exists "Authenticated progress photos access" on public.progress_photos;
+create policy "Authenticated progress records access" on public.progress_records for all to authenticated using (true) with check (true);
+create policy "Authenticated progress photos access" on public.progress_photos for all to authenticated using (true) with check (true);
+grant select, insert, update, delete on public.progress_records, public.progress_photos to authenticated;
+insert into storage.buckets (id, name, public) values ('progress-photos', 'progress-photos', false) on conflict (id) do nothing;
+drop policy if exists "Authenticated progress photo uploads" on storage.objects;
+drop policy if exists "Authenticated progress photo reads" on storage.objects;
+drop policy if exists "Authenticated progress photo updates" on storage.objects;
+drop policy if exists "Authenticated progress photo deletes" on storage.objects;
+create policy "Authenticated progress photo uploads" on storage.objects for insert to authenticated with check (bucket_id = 'progress-photos');
+create policy "Authenticated progress photo reads" on storage.objects for select to authenticated using (bucket_id = 'progress-photos');
+create policy "Authenticated progress photo updates" on storage.objects for update to authenticated using (bucket_id = 'progress-photos') with check (bucket_id = 'progress-photos');
+create policy "Authenticated progress photo deletes" on storage.objects for delete to authenticated using (bucket_id = 'progress-photos');
+notify pgrst, 'reload schema';

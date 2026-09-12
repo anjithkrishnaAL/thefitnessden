@@ -17,6 +17,7 @@ import { durationMinutes, formatDurationMinutes, getMemberAttendance } from '../
 import type { Attendance } from '../../types';
 import { MemberTrainerSection } from './MemberTrainerSection';
 import { MemberWorkoutSection } from './MemberWorkoutSection';
+import { MemberProgressSection } from './MemberProgressSection';
 
 interface MemberProfileProps {
   member: Member | null;
@@ -115,6 +116,7 @@ export function MemberProfile({ member, open, onClose }: MemberProfileProps) {
 
       <MemberTrainerSection member={member} />
       <MemberWorkoutSection member={member} />
+      <MemberProgressSection member={member} />
 
       <section className="pt-6">
         <h3 className="text-xs font-semibold text-den-muted uppercase tracking-widest mb-3">Future Modules</h3>
