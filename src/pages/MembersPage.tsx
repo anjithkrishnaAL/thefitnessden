@@ -14,8 +14,9 @@ import { MemberProfile } from '../components/members/MemberProfile';
 import { useToast } from '../hooks/useToast';
 import type { Member, MemberFilters, MemberStats as Stats } from '../types';
 import { deleteMember, exportMembers, getMemberStats, getMembers } from '../services/memberService';
+import { getTrainers } from '../services/trainerService';
 
-const INITIAL_FILTERS: MemberFilters = { search: '', status: '', gender: '', fitness_goal: '' };
+const INITIAL_FILTERS: MemberFilters = { search: '', status: '', gender: '', fitness_goal: '', trainer_id: '' };
 
 function csvCell(value: unknown): string {
   const text = value == null ? '' : String(value);
@@ -38,6 +39,7 @@ export function MembersPage() {
   const [deleting, setDeleting] = useState<Member | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [trainerOptions, setTrainerOptions] = useState<{ value: string; label: string }[]>([]);
   const { toasts, success, error: toastError, dismiss } = useToast();
 
   const loadStats = useCallback(async () => {
@@ -56,6 +58,7 @@ export function MembersPage() {
   }, [filters, page, pageSize]);
 
   useEffect(() => { loadStats(); }, [loadStats]);
+  useEffect(() => { getTrainers().then(rows => setTrainerOptions(rows.map(t => ({ value: t.id, label: t.full_name })))).catch(() => setTrainerOptions([])); }, []);
   useEffect(() => { const timer = window.setTimeout(loadMembers, 250); return () => window.clearTimeout(timer); }, [loadMembers]);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -104,7 +107,7 @@ export function MembersPage() {
         <div className="flex items-center gap-2"><Button variant="outline" icon={<Download size={15} />} loading={exporting} onClick={handleExport}>Export</Button><Button variant="primary" icon={<Plus size={15} />} onClick={openAdd}>Add Member</Button></div>
       </div>
       <MemberStats stats={stats} loading={statsLoading} />
-      <div className="bg-den-card border border-den-border rounded-xl p-3 sm:p-4"><MemberFiltersBar filters={filters} onChange={changeFilters} onClear={() => changeFilters(INITIAL_FILTERS)} /></div>
+      <div className="bg-den-card border border-den-border rounded-xl p-3 sm:p-4"><MemberFiltersBar filters={filters} onChange={changeFilters} onClear={() => changeFilters(INITIAL_FILTERS)} trainerOptions={trainerOptions} /></div>
 
       {error ? <div className="min-h-[320px] flex flex-col items-center justify-center text-center bg-den-card border border-den-border rounded-xl"><p className="text-base font-semibold text-den-text">Unable to load members.</p><p className="text-sm text-den-muted mt-1 mb-4">Check your connection and try again.</p><Button variant="outline" icon={<RefreshCw size={14} />} onClick={loadMembers}>Try Again</Button></div>
         : loading ? <><div className="hidden sm:block bg-den-card border border-den-border rounded-xl p-4"><Skeleton className="h-5 w-full" /><div className="mt-5 space-y-4">{Array.from({ length: 6 }, (_, i) => <Skeleton key={i} className="h-10 w-full" />)}</div></div><div className="sm:hidden space-y-3">{Array.from({ length: 4 }, (_, i) => <MemberCardSkeleton key={i} />)}</div></>

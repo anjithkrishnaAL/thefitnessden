@@ -73,6 +73,7 @@ export async function getMembers(
     if (filters.status)       query = query.eq('status', filters.status);
     if (filters.gender)       query = query.eq('gender', filters.gender);
     if (filters.fitness_goal) query = query.eq('fitness_goal', filters.fitness_goal);
+    if (filters.trainer_id) query = query.eq('trainer_id', filters.trainer_id);
 
     // Server-side pagination
     const from = (page - 1) * pageSize;
@@ -88,10 +89,14 @@ export async function getMembers(
     }
 
     const rows = (data as Member[]) ?? [];
-    const hydrated = await Promise.all(rows.map(async member => {
+    const trainerIds = [...new Set(rows.map(m => m.trainer_id).filter(Boolean))] as string[];
+    const { data: trainerRows } = trainerIds.length ? await supabase.from('trainers').select('id,trainer_id,full_name,specialization,profile_photo_url').in('id', trainerIds) : { data: [] };
+    const trainers = new Map((trainerRows ?? []).map(t => [t.id, t]));
+    const hydratedMemberships = await Promise.all(rows.map(async member => {
       try { return { ...member, current_membership: await getActiveMembership(member.id) }; }
       catch (membershipError) { console.error('[memberService.getMembers] membership lookup:', membershipError); return member; }
     }));
+    const hydrated = hydratedMemberships.map(member => ({ ...member, trainer: member.trainer_id ? trainers.get(member.trainer_id) ?? null : null }));
 
     return {
       data: hydrated,
@@ -119,6 +124,7 @@ export async function exportMembers(filters: MemberFilters): Promise<Member[]> {
     if (filters.status) query = query.eq('status', filters.status);
     if (filters.gender) query = query.eq('gender', filters.gender);
     if (filters.fitness_goal) query = query.eq('fitness_goal', filters.fitness_goal);
+    if (filters.trainer_id) query = query.eq('trainer_id', filters.trainer_id);
 
     const { data, error } = await query.order('created_at', { ascending: false });
     if (error) {

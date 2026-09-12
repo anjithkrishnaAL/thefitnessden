@@ -172,6 +172,7 @@ export interface Member {
   created_at: string;
   updated_at: string;
   current_membership?: MembershipSummary | null;
+  trainer?: Pick<Trainer, 'id' | 'trainer_id' | 'full_name' | 'specialization' | 'profile_photo_url'> | null;
 }
 
 export interface CreateMemberInput {
@@ -200,6 +201,7 @@ export interface MemberFilters {
   status: MemberStatus | '';
   gender: MemberGender | '';
   fitness_goal: FitnessGoal | '';
+  trainer_id: string;
 }
 
 export interface MemberStats {
@@ -215,6 +217,65 @@ export interface MemberPage {
   total: number;
   page: number;
   pageSize: number;
+}
+
+// ─── Trainers Module ──────────────────────────────────────────────────────────
+
+export type TrainerStatus = 'active' | 'inactive' | 'on_leave';
+
+export interface Trainer {
+  id: string;
+  trainer_id: string;
+  full_name: string;
+  email: string | null;
+  phone: string | null;
+  profile_photo_url: string | null;
+  specialization: string | null;
+  experience_years: number | null;
+  certifications: string | null;
+  bio: string | null;
+  salary: number | null;
+  status: TrainerStatus;
+  joining_date: string | null;
+  created_at: string;
+  updated_at: string;
+  assigned_count?: number;
+}
+
+export interface CreateTrainerInput {
+  full_name: string;
+  email?: string;
+  phone?: string;
+  specialization?: string;
+  experience_years?: number;
+  certifications?: string;
+  bio?: string;
+  salary?: number;
+  status?: TrainerStatus;
+  joining_date?: string;
+  profile_photo_url?: string;
+}
+
+export interface UpdateTrainerInput extends Partial<CreateTrainerInput> { id: string; }
+
+export interface TrainerFilters { search: string; status: TrainerStatus | ''; specialization: string; }
+
+export interface TrainerStats { total: number; active: number; assignedMembers: number; averageExperience: number; }
+
+export interface TrainerMember {
+  id: string;
+  member_id: string;
+  full_name: string;
+  profile_photo_url: string | null;
+  status: MemberStatus;
+  current_membership?: MembershipSummary | null;
+}
+
+export interface TrainerPerformance {
+  assignedMembers: number;
+  activeAssignedMembers: number;
+  attendanceCount: number;
+  averageMemberAttendance: number;
 }
 
 // ─── Memberships Module ──────────────────────────────────────────────────────

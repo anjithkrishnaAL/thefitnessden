@@ -49,6 +49,7 @@ export function MemberCard({ member: m, onView, onEdit, onDelete }: MemberCardPr
               <p className="text-xs text-den-muted truncate">{m.email}</p>
             )}
             <p className="text-xs text-den-subtle">Joined {formatDate(m.created_at)}</p>
+            <p className="text-xs text-den-subtle">Trainer: {m.trainer?.full_name ?? 'Unassigned'}</p>
           </div>
         </div>
       </div>

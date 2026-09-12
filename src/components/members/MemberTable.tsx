@@ -102,7 +102,7 @@ export function MemberTable({ members, loading, onView, onEdit, onDelete }: Memb
       <table className="w-full min-w-[720px] text-sm">
         <thead>
           <tr className="border-b border-den-border">
-            {['Member', 'Member ID', 'Contact', 'Membership', 'Status', 'Joined', ''].map(h => (
+            {['Member', 'Member ID', 'Contact', 'Membership', 'Trainer', 'Status', 'Joined', ''].map(h => (
               <th
                 key={h}
                 className={`text-left text-xs text-den-muted font-medium py-3 ${h === '' ? 'w-10 pr-4' : 'px-3'} ${h === 'Member' ? 'pl-4' : ''}`}
@@ -148,6 +148,8 @@ export function MemberTable({ members, loading, onView, onEdit, onDelete }: Memb
                 <td className="py-3 px-3">
                   {m.current_membership ? <div><p className="text-xs text-den-text">{m.current_membership.plan_name}</p><p className="text-2xs text-den-muted">Ends {m.current_membership.end_date}</p></div> : <span className="text-xs text-den-muted italic">Not assigned</span>}
                 </td>
+
+                <td className="py-3 px-3"><span className="text-xs text-den-muted">{m.trainer?.full_name ?? '—'}</span></td>
 
                 {/* Status */}
                 <td className="py-3 px-3">

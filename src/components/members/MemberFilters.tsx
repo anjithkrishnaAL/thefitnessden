@@ -7,6 +7,7 @@ interface MemberFiltersBarProps {
   filters: MemberFilters;
   onChange: (f: MemberFilters) => void;
   onClear: () => void;
+  trainerOptions?: { value: string; label: string }[];
 }
 
 const statusOptions: { value: MemberStatus | ''; label: string }[] = [
@@ -34,7 +35,7 @@ const goalOptions: { value: FitnessGoal | ''; label: string }[] = [
 ];
 
 const isFiltered = (f: MemberFilters) =>
-  f.search.trim() || f.status || f.gender || f.fitness_goal;
+  f.search.trim() || f.status || f.gender || f.fitness_goal || f.trainer_id;
 
 function FilterSelect<T extends string>({
   value,
@@ -69,7 +70,7 @@ function FilterSelect<T extends string>({
   );
 }
 
-export function MemberFiltersBar({ filters, onChange, onClear }: MemberFiltersBarProps) {
+export function MemberFiltersBar({ filters, onChange, onClear, trainerOptions = [] }: MemberFiltersBarProps) {
   return (
     <div className="flex flex-col sm:flex-row gap-2.5 flex-wrap items-start sm:items-center">
       {/* Search */}
@@ -115,6 +116,7 @@ export function MemberFiltersBar({ filters, onChange, onClear }: MemberFiltersBa
           options={goalOptions}
           onChange={v => onChange({ ...filters, fitness_goal: v })}
         />
+        {trainerOptions.length > 0 && <FilterSelect<string> value={filters.trainer_id} options={[{ value: '', label: 'All Trainers' }, ...trainerOptions]} onChange={v => onChange({ ...filters, trainer_id: v })} />}
         {isFiltered(filters) && (
           <button
             onClick={onClear}
