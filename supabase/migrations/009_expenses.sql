@@ -1,0 +1,24 @@
+-- TheFitnessDen — Expense management
+create sequence if not exists public.expense_id_seq;
+create or replace function public.generate_expense_id() returns text language plpgsql security definer set search_path = public as $$ begin return 'EXP-' || lpad(nextval('public.expense_id_seq')::text, 4, '0'); end; $$;
+create table if not exists public.expenses (id uuid primary key default gen_random_uuid(), expense_id text unique not null default public.generate_expense_id(), title text not null, category text not null, amount numeric(12,2) not null check (amount > 0), expense_date date not null, payment_method text, vendor text, description text, status text not null default 'paid' check (status in ('paid','pending','cancelled')), receipt_url text, created_by uuid, created_at timestamptz not null default now(), updated_at timestamptz not null default now());
+create index if not exists expenses_date_idx on public.expenses(expense_date desc);
+create index if not exists expenses_category_idx on public.expenses(category);
+create index if not exists expenses_status_idx on public.expenses(status);
+drop trigger if exists expenses_set_updated_at on public.expenses;
+create trigger expenses_set_updated_at before update on public.expenses for each row execute function public.set_updated_at();
+alter table public.expenses enable row level security;
+drop policy if exists "Authenticated expenses access" on public.expenses;
+create policy "Authenticated expenses access" on public.expenses for all to authenticated using (true) with check (true);
+grant select, insert, update, delete on public.expenses to authenticated;
+grant usage, select on sequence public.expense_id_seq to authenticated;
+insert into storage.buckets(id, name, public) values ('expense-receipts', 'expense-receipts', false) on conflict (id) do nothing;
+drop policy if exists "Authenticated expense receipt uploads" on storage.objects;
+drop policy if exists "Authenticated expense receipt reads" on storage.objects;
+drop policy if exists "Authenticated expense receipt updates" on storage.objects;
+drop policy if exists "Authenticated expense receipt deletes" on storage.objects;
+create policy "Authenticated expense receipt uploads" on storage.objects for insert to authenticated with check (bucket_id = 'expense-receipts');
+create policy "Authenticated expense receipt reads" on storage.objects for select to authenticated using (bucket_id = 'expense-receipts');
+create policy "Authenticated expense receipt updates" on storage.objects for update to authenticated using (bucket_id = 'expense-receipts') with check (bucket_id = 'expense-receipts');
+create policy "Authenticated expense receipt deletes" on storage.objects for delete to authenticated using (bucket_id = 'expense-receipts');
+notify pgrst, 'reload schema';

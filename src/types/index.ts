@@ -451,3 +451,9 @@ export interface WorkoutPlanFilters { search: string; status: WorkoutPlanStatus 
 export interface ProgressRecord { id: string; member_id: string; recorded_date: string; weight: number | null; height: number | null; body_fat_percentage: number | null; chest: number | null; waist: number | null; hips: number | null; arms: number | null; thighs: number | null; notes: string | null; created_at: string; updated_at: string; }
 export type ProgressPhotoType = 'Front' | 'Side' | 'Back' | 'Other';
 export interface ProgressPhoto { id: string; member_id: string; photo_url: string; photo_type: ProgressPhotoType | null; taken_date: string | null; notes: string | null; created_at: string; }
+
+// ─── Expenses Module ─────────────────────────────────────────────────────────
+export type ExpenseStatus = 'paid' | 'pending' | 'cancelled';
+export type ExpensePaymentMethod = 'cash' | 'upi' | 'card' | 'bank_transfer' | 'other';
+export interface Expense { id: string; expense_id: string; title: string; category: string; amount: number; expense_date: string; payment_method: ExpensePaymentMethod | null; vendor: string | null; description: string | null; status: ExpenseStatus; receipt_url: string | null; created_by: string | null; created_at: string; updated_at: string; }
+export interface ExpenseFilters { search: string; category: string; status: ExpenseStatus | ''; method: ExpensePaymentMethod | ''; fromDate: string; toDate: string; }
