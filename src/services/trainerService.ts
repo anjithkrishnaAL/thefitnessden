@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { getActiveMembership } from './membershipService';
 import type { CreateTrainerInput, Trainer, TrainerFilters, TrainerMember, TrainerPerformance, TrainerStats, UpdateTrainerInput } from '../types';
 
 const BUCKET = 'trainer-photos';
@@ -61,13 +62,14 @@ export async function getTrainerStats(): Promise<TrainerStats> {
   if (trainerError) throw new Error(trainerError.message);
   if (memberError) throw new Error(memberError.message);
   const experience = (trainers ?? []).map(t => Number(t.experience_years)).filter(n => Number.isFinite(n));
-  return { total: trainers?.length ?? 0, active: trainers?.filter(t => t.status === 'active').length ?? 0, assignedMembers: members?.length ?? 0, averageExperience: experience.length ? experience.reduce((a, b) => a + b, 0) / experience.length : 0 };
+  const { count: totalMembers } = await supabase.from('members').select('id', { count: 'exact', head: true });
+  return { total: trainers?.length ?? 0, active: trainers?.filter(t => t.status === 'active').length ?? 0, assignedMembers: members?.length ?? 0, unassignedMembers: Math.max(0, (totalMembers ?? 0) - (members?.length ?? 0)), averageExperience: experience.length ? experience.reduce((a, b) => a + b, 0) / experience.length : 0 };
 }
 
 export async function getTrainerMembers(trainerId: string): Promise<TrainerMember[]> {
-  const { data, error } = await supabase.from('members').select('id,member_id,full_name,profile_photo_url,status').eq('trainer_id', trainerId).order('full_name');
+  const { data, error } = await supabase.from('members').select('id,member_id,full_name,email,phone,profile_photo_url,status').eq('trainer_id', trainerId).order('full_name');
   if (error) throw new Error(error.message);
-  return (data ?? []) as TrainerMember[];
+  return Promise.all((data ?? []).map(async member => ({ ...member, current_membership: await getActiveMembership(member.id).catch(() => null) }))) as Promise<TrainerMember[]>;
 }
 
 export async function assignMemberToTrainer(memberId: string, trainerId: string): Promise<void> {

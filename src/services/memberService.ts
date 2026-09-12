@@ -73,7 +73,8 @@ export async function getMembers(
     if (filters.status)       query = query.eq('status', filters.status);
     if (filters.gender)       query = query.eq('gender', filters.gender);
     if (filters.fitness_goal) query = query.eq('fitness_goal', filters.fitness_goal);
-    if (filters.trainer_id) query = query.eq('trainer_id', filters.trainer_id);
+    if (filters.trainer_id === '__unassigned__') query = query.is('trainer_id', null);
+    else if (filters.trainer_id) query = query.eq('trainer_id', filters.trainer_id);
 
     // Server-side pagination
     const from = (page - 1) * pageSize;
@@ -124,7 +125,8 @@ export async function exportMembers(filters: MemberFilters): Promise<Member[]> {
     if (filters.status) query = query.eq('status', filters.status);
     if (filters.gender) query = query.eq('gender', filters.gender);
     if (filters.fitness_goal) query = query.eq('fitness_goal', filters.fitness_goal);
-    if (filters.trainer_id) query = query.eq('trainer_id', filters.trainer_id);
+    if (filters.trainer_id === '__unassigned__') query = query.is('trainer_id', null);
+    else if (filters.trainer_id) query = query.eq('trainer_id', filters.trainer_id);
 
     const { data, error } = await query.order('created_at', { ascending: false });
     if (error) {

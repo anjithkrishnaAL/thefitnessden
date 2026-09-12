@@ -116,7 +116,7 @@ export function MemberFiltersBar({ filters, onChange, onClear, trainerOptions = 
           options={goalOptions}
           onChange={v => onChange({ ...filters, fitness_goal: v })}
         />
-        {trainerOptions.length > 0 && <FilterSelect<string> value={filters.trainer_id} options={[{ value: '', label: 'All Trainers' }, ...trainerOptions]} onChange={v => onChange({ ...filters, trainer_id: v })} />}
+        {trainerOptions.length > 0 && <FilterSelect<string> value={filters.trainer_id} options={[{ value: '', label: 'All Trainers' }, { value: '__unassigned__', label: 'Unassigned' }, ...trainerOptions]} onChange={v => onChange({ ...filters, trainer_id: v })} />}
         {isFiltered(filters) && (
           <button
             onClick={onClear}

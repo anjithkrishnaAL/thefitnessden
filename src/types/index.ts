@@ -260,12 +260,14 @@ export interface UpdateTrainerInput extends Partial<CreateTrainerInput> { id: st
 
 export interface TrainerFilters { search: string; status: TrainerStatus | ''; specialization: string; }
 
-export interface TrainerStats { total: number; active: number; assignedMembers: number; averageExperience: number; }
+export interface TrainerStats { total: number; active: number; assignedMembers: number; unassignedMembers?: number; averageExperience: number; }
 
 export interface TrainerMember {
   id: string;
   member_id: string;
   full_name: string;
+  email: string | null;
+  phone: string | null;
   profile_photo_url: string | null;
   status: MemberStatus;
   current_membership?: MembershipSummary | null;
